@@ -53,7 +53,7 @@ except:
 
 def main():
 	
-    queryHeader = "INSERT INTO routes (SHAPE) VALUES ( GeomFromText( \' LineString("
+	queryHeader = "INSERT INTO routes (SHAPE) VALUES ( GeomFromText( \' LineString("
 	queryFooter = ") \' ) )"
 	queryBody = ""
 
