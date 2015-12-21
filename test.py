@@ -43,6 +43,8 @@ with fiona.open('./shapefiles/paradasRutas.shp', 'r') as input:
     print point.GetX(), point.GetY()
 
 
+
+
            #print utm.to_latlon(340000, 5710000, 32, 'U')
            #coord = utm.to_latlon(float(x), float(y), 31, 'U')
            #print coord

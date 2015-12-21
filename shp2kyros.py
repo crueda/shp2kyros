@@ -18,6 +18,12 @@ import sys
 import utm
 import logging, logging.handlers
 
+import fiona
+import utm
+import ogr, osr
+
+from shapely.geometry import shape
+
 #### VARIABLES #########################################################
 MAX_THREADS = 51
 
@@ -57,22 +63,50 @@ def main():
 	queryFooter = ") \' ) )"
 	queryBody = ""
 
-	with open('./rutas0.txt') as fp:
-		for line in fp:
+    # Spatial Reference System
+	inputEPSG = 3857
+	outputEPSG = 4326
+    # create coordinate transformation
+	inSpatialRef = osr.SpatialReference()
+	inSpatialRef.ImportFromEPSG(inputEPSG)
+	outSpatialRef = osr.SpatialReference()
+	outSpatialRef.ImportFromEPSG(outputEPSG)
 
-			vline = line.split(" ")
-			nelement = 0
-			for element in vline:
-				nelement += 1
-				vcoord = element.split(",")
-				lat = float(vcoord[1])
-				lon = float(vcoord[0])
+	with fiona.open('./shapefiles/paradasRutas.shp', 'r') as input:
+		nelement = 0
+  		for pt in input:
+  			# Propiedades especifica
+			codigo = pt['properties']['COD_RUTA']
+			num_seq = pt['properties']['NUM_SECUEN']
+    		
+    		# Coordenadas
+			pointX = shape(pt['geometry']).x
+			pointY = shape(pt['geometry']).y
 
-				point_utm = utm.from_latlon(lat, lon)
-				if (nelement==1):
-					queryBody = queryBody + str(point_utm[0]) + " " + str(point_utm[1])
-				else:
-					queryBody = queryBody + "," + str(point_utm[0]) + " " + str(point_utm[1])			
+    		# create a geometry from coordinates
+			point = ogr.Geometry(ogr.wkbPoint)
+			point.AddPoint(pointX, pointY)
+
+			coordTransform = osr.CoordinateTransformation(inSpatialRef, outSpatialRef)
+
+    		# transform point
+			point.Transform(coordTransform)
+
+   			# print point in EPSG 4326
+    		#print point.GetX(), point.GetY()
+
+			nelement += 1
+			lon = point.GetX()
+			lat = point.GetY()
+
+			#point_utm = utm.from_latlon(lat, lon)
+			#x = str(point_utm[0])
+			#y = str(point_utm[1])
+
+			if (nelement==1):
+				queryBody = queryBody +  " " + str(lat) + " " + str(lon)
+			else:
+				queryBody = queryBody + "," + str(lat) + " " + str(lon)			
 
 			query = queryHeader + queryBody + queryFooter + ";"
 			print query
