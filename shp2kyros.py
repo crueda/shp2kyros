@@ -27,7 +27,8 @@ from shapely.geometry import shape
 #### VARIABLES #########################################################
 vRoute = []
 
-LOG_FOLDER = "/var/log/correos/shp2kyros.log"
+#LOG_FOLDER = "/var/log/correos/shp2kyros.log"
+LOG_FOLDER = "./shp2kyros.log"
 
 queryHeader = "INSERT INTO routes (SHAPE) VALUES ( GeomFromText( \' LineString("
 queryFooter = ") \' ) )"
@@ -138,6 +139,10 @@ def main():
 			route = searchRoute(codigo)
 			if (route != None):
 				route.vPoint.append (newPoint)
+				if (len(vRoute) == 2):
+					print "SI" + str(len(vRoute[1].vPoint))
+					if (len(vRoute[1].vPoint) == 2):
+						print "-->" + vRoute[1].vPoint[1].description
 			else:
 				newRoute = Route (codigo)
 				newRoute.vPoint.append (newPoint) 
@@ -146,10 +151,13 @@ def main():
 	#Escribir en fichero de salida
 	logger.info("Escribiendo fichero de salida: " + file_out)
 
+	print vRoute[1].vPoint[1].description
 	for route in vRoute:
+		print "ruta: " + str(route.cod)
 		nelement = 0
 		queryBody = ""
 		for point in route.vPoint:
+			print "punto: " + point.description
 			nelement += 1
 			if (nelement==1):
 				queryBody = queryBody +  " " + str(point.sequence) + " " + str(point.description)
