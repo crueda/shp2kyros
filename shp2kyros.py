@@ -163,6 +163,7 @@ def main():
 		logger.info(str(query)+"\n")
 		fichero_sql.writelines(str(query)+"\n")
 		
+		
 
 	fichero_sql.close
 
